@@ -8,6 +8,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\View\View;
+use App\Models\Activity;
+use Carbon\Carbon;
+
 
 class ProfileController extends Controller
 {
@@ -57,4 +60,48 @@ class ProfileController extends Controller
 
         return Redirect::to('/');
     }
+
+
+
+    /**
+        * Handle save activity
+     */
+
+    public function saveActivity(Request $request)
+    {
+        $request->validate([
+            'dateTime' => 'required|date_format:Y-m-d\TH:i:s',
+            'activity' => 'required|string|max:255',
+        ]);
+
+        // Create a new activity record
+        $activity = new Activity();
+        $activity->date = Carbon::parse($request->dateTime)->format('Y-m-d');
+        $activity->time = Carbon::parse($request->dateTime)->format('H:i:s');
+        $activity->activity = $request->activity;
+        $activity->save();
+
+        return response()->json(['success' => true]);
+    }
+
+
+
+    public function getEvents(Request $request)
+    {
+       // Retrieve events data from the database
+    $events = Activity::all()->map(function ($activity) {
+        // Combine date and time components
+        $dateTime = $activity->date . ' ' . $activity->time;
+
+        return [
+            'title' => $activity->activity,
+            'start' => $dateTime, // Include both date and time components
+            'allDay' => false,
+            // You can include other fields such as end date/time, color, etc. as needed
+        ];
+    });
+        // Return events data as JSON response
+        return response()->json($events);
+    }
+
 }
