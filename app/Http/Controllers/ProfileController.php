@@ -8,7 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\View\View;
-use App\Models\Activity;
+use App\Models\EventTable;
 use Carbon\Carbon;
 
 
@@ -67,41 +67,103 @@ class ProfileController extends Controller
         * Handle save activity
      */
 
-    public function saveActivity(Request $request)
-    {
-        $request->validate([
-            'dateTime' => 'required|date_format:Y-m-d\TH:i:s',
-            'activity' => 'required|string|max:255',
-        ]);
+   public function saveEvent(Request $request)
+{
+    // Validate the request data
+    $validatedData = $request->validate([
+        'cast_name' => 'required|string|max:255',
+        'main_cast_name' => 'required|string|max:255',
+        'is_translated' => 'required|in:yes,no',
+        'channel_name' => 'required|string|max:255',
+        'upload_date' => 'required|date_format:Y-m-d',
+        'play_date' => 'required|date_format:Y-m-d',
+        // Add validation rules for other fields as needed
+    ]);
 
-        // Create a new activity record
-        $activity = new Activity();
-        $activity->date = Carbon::parse($request->dateTime)->format('Y-m-d');
-        $activity->time = Carbon::parse($request->dateTime)->format('H:i:s');
-        $activity->activity = $request->activity;
-        $activity->save();
+    // Create a new event record
+    $event = EventTable::create($validatedData);
 
-        return response()->json(['success' => true]);
-    }
-
-
+    // Return a success response
+    return response()->json(['success' => true]);
+}
 
     public function getEvents(Request $request)
     {
-       // Retrieve events data from the database
-    $events = Activity::all()->map(function ($activity) {
-        // Combine date and time components
-        $dateTime = $activity->date . ' ' . $activity->time;
+        // Retrieve events data from the database
+        $events = EventTable::all()->map(function ($event) {
+            return [
+                'title' => $event->cast_name,
+                'start' => $event->upload_date,
+                
+                // Add other fields as needed
+            ];
+        });
 
-        return [
-            'title' => $activity->activity,
-            'start' => $dateTime, // Include both date and time components
-            'allDay' => false,
-            // You can include other fields such as end date/time, color, etc. as needed
-        ];
-    });
         // Return events data as JSON response
         return response()->json($events);
     }
+
+
+
+
+    public function getCast($castName)
+    {
+        
+        $cast = EventTable::where('cast_name', $castName)->first();
+
+        // Check if cast data exists
+        if ($cast) {
+            // Transform the cast data as needed
+            $castData = [
+                'cast_name' => $cast->cast_name,
+                'main_cast_name' => $cast->main_cast_name,
+                'is_translated' => $cast->is_translated,
+                'channel_name' => $cast->channel_name,
+                'upload_date' => $cast->upload_date,
+                'play_date' => $cast->play_date,
+                // Add other fields as needed
+            ];
+
+            // Return the cast data as JSON response
+            return response()->json($castData);
+        } else {
+            // Return a not found response if cast data does not exist
+            return response()->json(['error' => 'Cast not found'], 404);
+        }
+    }
+
+
+
+     /**
+     * Update the event information.
+     */
+   public function updateEvent(Request $request, $castName): JsonResponse
+{
+    // Find the event record by its cast_name
+    $event = EventTable::where('cast_name', $castName)->first();
+
+    // Check if the event record exists
+    if (!$event) {
+        // Return a not found response if event does not exist
+        return response()->json(['error' => 'Event not found'], 404);
+    }
+
+    // Validate the request data
+    $validatedData = $request->validate([
+        'cast_name' => 'required|string|max:255',
+        'main_cast_name' => 'required|string|max:255',
+        'is_translated' => 'required|in:yes,no',
+        'channel_name' => 'required|string|max:255',
+        'upload_date' => 'required|date_format:Y-m-d',
+        'play_date' => 'required|date_format:Y-m-d',
+        // Add validation rules for other fields as needed
+    ]);
+
+    // Update the event record with the validated data
+    $event->update($validatedData);
+
+    // Return a success response
+    return response()->json(['success' => true]);
+}
 
 }

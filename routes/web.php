@@ -15,10 +15,20 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-    Route::post('/save-activity', [ProfileController::class, 'saveActivity'])->name('profile.saveActivity');
+    Route::post('/save-event', [ProfileController::class, 'saveEvent'])->name('profile.saveEvent');
+    Route::get('/get-events', [ProfileController::class, 'getEvents'])->name('profile.getEvents');
+    Route::get('/get-cast/{castName}', [ProfileController::class, 'getCast'])->name('profile.getCast');
+
+    //try to change it to post and see
+    
+    Route::PUT('/update-event/{castName}', [ProfileController::class, 'updateEvent'])->name('profile.updateEvent');
+
+
+    
+
 });
 
 
-Route::middleware('auth')->get('/get-events', [ProfileController::class, 'getEvents'])->name('get-events');
+
 
 require __DIR__.'/auth.php';
