@@ -1,4 +1,4 @@
-
+// import { calendar } from './app.js'; // Adjust the path as necessary
 
 export function handleDateClick(info) {
     $("#event_entry_modal").modal("show");
@@ -131,7 +131,6 @@ export function handleUpdateError(error) {
 export function handleSaveResponse(response) {
     if (response.ok) {
         console.log("Event saved successfully");
-        calendar.refetchEvents();
         location.reload();
     } else {
         console.error("Failed to save event");
