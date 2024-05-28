@@ -19,12 +19,12 @@ Alpine.start();
 
 document.addEventListener("DOMContentLoaded", function () {
     // Attach click event listener to cast name
-    const castNameField = document.getElementById("cast_name");
-    castNameField.addEventListener("click", handleCastNameClick);
+    // const castNameField = document.getElementById("cast_name");
+    // castNameField.addEventListener("click", handleCastNameClick);
 
-    document.addEventListener("click", function (event) {
-        console.log("Clicked element:", event.target);
-    });
+    // document.addEventListener("click", function (event) {
+    //     console.log("Clicked element:", event.target);
+    // });
 
     const calendarEl = document.getElementById("calendar");
     const calendar = new Calendar(calendarEl, {
@@ -37,6 +37,7 @@ document.addEventListener("DOMContentLoaded", function () {
         },
         
         events: "/get-events",
+        channel:"/channel/{channelName}",
         dateClick: handleDateClick,
     });
 
@@ -49,3 +50,4 @@ document.addEventListener("DOMContentLoaded", function () {
         saveEventButton.addEventListener("click", saveEvent);
     }
 });
+
