@@ -24,8 +24,11 @@ class EventTable extends Model
         'cast_name',
         'main_cast_name',
         'is_translated',
+        'type_of_control',
         'channel_name',
+        'duration', 
         'upload_date',
         'play_date',
+        'end_date', 
     ];
 }
