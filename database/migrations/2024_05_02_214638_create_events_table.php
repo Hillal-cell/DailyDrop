@@ -16,9 +16,12 @@ return new class extends Migration
             $table->string('cast_name');
             $table->string('main_cast_name');
             $table->enum('is_translated', ['yes', 'no']);
+            $table->enum('type_of_control', ['Music', 'Movie']);
             $table->string('channel_name');
+            $table->integer('duration');
             $table->date('upload_date');
             $table->date('play_date');
+            $table->date('end_date');
             $table->timestamps();
         });
     }
