@@ -1,5 +1,6 @@
 <x-app-layout>
     <x-slot name="header">
+        
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
             {{ __('Calendar for ') . $channelName }}
         </h2>
@@ -42,10 +43,13 @@
                 header: {
                     left: 'prev,next today',
                     center: 'title',
-                    right: 'month,agendaWeek,agendaDay'
+                    right: 'month,agendaWeek,agendaDay,listMonth'
                 },
+
                 events: '/channel/' + channelName + '/events'
+                
             });
+            
         });
     </script>
 </x-app-layout>
