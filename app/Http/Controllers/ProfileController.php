@@ -10,6 +10,8 @@ use Illuminate\Support\Facades\Redirect;
 use Illuminate\View\View;
 use App\Models\EventTable;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Http\JsonResponse;
 
 
 class ProfileController extends Controller
@@ -62,7 +64,6 @@ class ProfileController extends Controller
     }
 
 
-
     /**
         * Handle save activity
      */
@@ -79,8 +80,15 @@ class ProfileController extends Controller
              'duration' => 'required|integer|min:1',
              'upload_date' => 'required|date_format:Y-m-d',
              'play_date' => 'required|date_format:Y-m-d',
+             'start_time' => 'required|date_format:H:i',
+             'end_time' => 'required|date_format:H:i',
              'end_date' => 'required|date_format:Y-m-d',
+             // Add validation rules for other fields as needed
          ]);
+     
+         // Convert start_time and end_time to H:i:s format
+         $validatedData['start_time'] = Carbon::createFromFormat('H:i', $validatedData['start_time'])->format('H:i:s');
+         $validatedData['end_time'] = Carbon::createFromFormat('H:i', $validatedData['end_time'])->format('H:i:s');
      
          // Check if an event with the same details already exists
          $existingEvent = EventTable::where('cast_name', $validatedData['cast_name'])
@@ -102,125 +110,166 @@ class ProfileController extends Controller
          return response()->json(['success' => true]);
      }
      
+     
 
-    public function getEvents(Request $request)
-    {
-        // Retrieve events data from the database
-        $events = EventTable::all()->map(function ($event) {
-            return [
-                'title' => $event->cast_name,
-                'start' => $event->upload_date,
-                'description' => $event->main_cast_name,
-                // 'end' => $event->end_date,
-                'channel_name' => $event->channel_name,
-                'editable' => true,
-                'allDay' => true,
-                
-                // Add other fields as needed
-            ];
-        });
+     public function getEvents(Request $request)
+     {
+         // Retrieve events data from the database
+         $events = EventTable::all()->map(function ($event) {
+             // Combine upload_date with start_time and end_time and convert to ISO 8601 format
+             $start_datetime = Carbon::createFromFormat('Y-m-d H:i:s', $event->upload_date . ' ' . $event->start_time)->toIso8601String();
+             $end_datetime = Carbon::createFromFormat('Y-m-d H:i:s', $event->upload_date . ' ' . $event->end_time)->toIso8601String();
+     
+            
+             return [
+                 'title' => $event->cast_name,
+                 'start' => $start_datetime,
+                 'end' => $end_datetime,
+                 'description' => $event->main_cast_name,
+                 'channel_name' => $event->channel_name, 
+                 'editable' => true,
+                 'allDay' => false,
+                 'color' => 'blue',
+                 'backgroundColor' => 'green',
+             ];
+         });
+     
+         // Return events data as JSON response
+         return response()->json($events);
+     }
+     
 
-        // Return events data as JSON response
-        return response()->json($events);
-    }
+     
 
-
-    public function getCast($castName)
-    {
-        
-        $cast = EventTable::where('cast_name', $castName)->first();
-
-        // Check if cast data exists
-        if ($cast) {
-            // Transform the cast data as needed
-            $castData = [
-                'cast_name' => $cast->cast_name,
-                'main_cast_name' => $cast->main_cast_name,
-                'is_translated' => $cast->is_translated,
-                'type_of_control' => $cast->type_of_control,
-                'channel_name' => $cast->channel_name,
-                'duration' => $cast->duration,
-                'upload_date' => $cast->upload_date,
-                'play_date' => $cast->play_date,
-                'end_date' => $cast->end_date,
-                // Add other fields as needed
-            ];
-
-            // Return the cast data as JSON response
-            return response()->json($castData);
-        } else {
-            // Return a not found response if cast data does not exist
-            return response()->json(['error' => 'Cast not found'], 404);
-        }
-    }
+     public function getCast($castName)
+     {
+         $cast = EventTable::where('cast_name', $castName)->first();
+     
+         // Check if cast data exists
+         if ($cast) {
+             // Transform the cast data as needed, formatting the time fields
+             $castData = [
+                 'cast_name' => $cast->cast_name,
+                 'main_cast_name' => $cast->main_cast_name,
+                 'is_translated' => $cast->is_translated,
+                 'type_of_control' => $cast->type_of_control,
+                 'channel_name' => $cast->channel_name,
+                 'duration' => $cast->duration,
+                 'upload_date' => $cast->upload_date,
+                 'play_date' => $cast->play_date,
+                 'start_time' => \Carbon\Carbon::createFromFormat('H:i:s', $cast->start_time)->format('H:i'),
+                 'end_time' => \Carbon\Carbon::createFromFormat('H:i:s', $cast->end_time)->format('H:i'),
+                 'end_date' => $cast->end_date,
+                 // Add other fields as needed
+             ];
+     
+             // Return the cast data as JSON response
+             return response()->json($castData);
+         } else {
+             // Return a not found response if cast data does not exist
+             return response()->json(['error' => 'Cast not found'], 404);
+         }
+     }
+     
 
 
      /**
      * Update the event information.
      */
-   public function updateEvent(Request $request, $castName): JsonResponse
+    public function updateEvent(Request $request, $castName): JsonResponse
 {
-    // Find the event record by its cast_name
-    $event = EventTable::where('cast_name', $castName)->first();
+    try {
+        // Find the event record by its cast_name
+        $event = EventTable::where('cast_name', $castName)->first();
+        
+        // Check if the event record exists
+        if (!$event) {
+            // Return a not found response if event does not exist
+            return response()->json(['error' => 'Event not found'], 404);
+        }
+        
+        // Validate the request data
+        $validatedData = $request->validate([
+            'cast_name' => 'required|string|max:255',
+            'main_cast_name' => 'required|string|max:255',
+            'is_translated' => 'required|in:yes,no',
+            'type_of_control' => 'required|in:Music,Movie',
+            'channel_name' => 'required|string|max:255',
+            'upload_date' => 'required|date_format:Y-m-d',
+            'duration' => 'required|integer|min:1',
+            'play_date' => 'required|date_format:Y-m-d',
+            'start_time' => 'required|date_format:H:i',
+            'end_time' => 'required|date_format:H:i',
+        ]);
 
-    // Check if the event record exists
-    if (!$event) {
-        // Return a not found response if event does not exist
-        return response()->json(['error' => 'Event not found'], 404);
+        // Convert start_time and end_time to H:i:s format
+        $validatedData['start_time'] = Carbon::createFromFormat('H:i', $validatedData['start_time'])->format('H:i:s');
+        $validatedData['end_time'] = Carbon::createFromFormat('H:i', $validatedData['end_time'])->format('H:i:s');
+
+        // Calculate end date based on other fields
+        $endDate = Carbon::createFromFormat('Y-m-d', $validatedData['play_date'])
+        ->addDays((int)$validatedData['duration']);
+
+        // Add end date to validated data
+        $validatedData['end_date'] = $endDate->format('Y-m-d');
+
+        // Log the validated data for debugging
+        Log::info('Validated data:', $validatedData);
+
+        // Update the event record with the validated data
+        $event->update($validatedData);
+
+        // Return a success response
+        return response()->json(['success' => true]);
+    } catch (\Exception $e) {
+        // Log the exception message for debugging
+        Log::error('Error updating event: ' . $e->getMessage());
+
+        // Return an error response
+        return response()->json(['error' => 'Failed to update event'], 500);
+    }
+}
+    /**
+     * Display the calendar for a specific channel.
+     */
+    public function showChannelCalendar($channelName)
+    {
+
+        // Fetch distinct channel names from the events table
+        $channelNames = EventTable::distinct()->pluck('channel_name');
+
+        // Pass both the selected channel name and the list of all channel names to the view
+        return view('channelContent', ['channelName' => $channelName, 'channels' => $channelNames]);
     }
 
-    // Validate the request data
-    $validatedData = $request->validate([
-        'cast_name' => 'required|string|max:255',
-        'main_cast_name' => 'required|string|max:255',
-        'is_translated' => 'required|in:yes,no',
-        'type_of_control' => 'required|in:Music,Movie',
-        'channel_name' => 'required|string|max:255',
-        'upload_date' => 'required|date_format:Y-m-d',
-        'duration' => 'required|integer|min:1',
-        'play_date' => 'required|date_format:Y-m-d',
-        'end_date' => 'required|date_format:Y-m-d',
-        // Add validation rules for other fields as needed
-    ]);
+    /**
+     * Get the events for a specific channel.
+     */
+    public function getChannelEvents($channelName)
+    {
+        $events = EventTable::where('channel_name', $channelName)->get();
 
-    // Update the event record with the validated data
-    $event->update($validatedData);
+        
 
-    // Return a success response
-    return response()->json(['success' => true]);
-}
+        $formattedEvents = $events->map(function ($event) {
 
+            return [
+                'title' => $event->cast_name,
+                'start' => $event->upload_date.'T'.$event->start_time,
+                'allDay' => false,
+                
+                
+            ];
+        });
 
-public function showChannelCalendar($channelName)
-{
-
-     // Fetch distinct channel names from the events table
-     $channelNames = EventTable::distinct()->pluck('channel_name');
-
-     // Pass both the selected channel name and the list of all channel names to the view
-     return view('channelContent', ['channelName' => $channelName, 'channels' => $channelNames]);
- }
-
-public function getChannelEvents($channelName)
-{
-    $events = EventTable::where('channel_name', $channelName)->get();
-
-    $formattedEvents = $events->map(function ($event) {
-        return [
-            'title' => $event->cast_name,
-            'start' => $event->upload_date,
-            'end' => $event->end_date, // Ensure 'end_date' is present in your events
-        ];
-    });
-
-    return response()->json($formattedEvents);
-}
+        return response()->json($formattedEvents);
+    }
 
 
 
-public function getReport(){
-    return view('report');
-}
+    public function getReport(){
+        return view('report');
+    }
 
 
 
