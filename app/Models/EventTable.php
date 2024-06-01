@@ -29,6 +29,10 @@ class EventTable extends Model
         'duration', 
         'upload_date',
         'play_date',
-        'end_date', 
+        'end_date',
+        'start_time',
+        'end_time',
+         
+        
     ];
 }
