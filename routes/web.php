@@ -29,7 +29,8 @@ Route::middleware('auth','log.audit')->group(function () {
     Route::get('/channel/{channelName}/calendar', [ProfileController::class, 'showChannelCalendar'])->name('channel.calendar');
     Route::get('/channel/{channelName}/events', [ProfileController::class, 'getChannelEvents']);
     Route::get('/report',[ProfileController::class,'getReport'])->name('report');
-    Route::put('/update-event/{castName}', [ProfileController::class, 'updateEvent'])->name('profile.updateEvent');
+    Route::patch('/update-event/{castName}', [ProfileController::class, 'updateEvent'])->name('profile.updateEvent');
+
 
 
     
