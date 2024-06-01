@@ -7,6 +7,9 @@
 
         <title>{{ config('app.name', 'DailyDrop') }}</title>
 
+        
+        <link rel="icon" href="{{ asset('favicon.png') }}" type="image/png">
+
 
         <!-- Bootstrap CSS -->
         <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" rel="stylesheet">
@@ -48,7 +51,15 @@
                 <!-- Bootstrap JS -->
                 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
                 {{ $slot }}
+
+
+                <footer class="py-16 text-center text-sm text-black dark:text-white/70" style="color:blueviolet` ">
+                    {{config('app.name')}} &copy; 2024. All rights reserved.    
+                </footer>
             </main>
+            
         </div>
+
+       
     </body>
 </html>
