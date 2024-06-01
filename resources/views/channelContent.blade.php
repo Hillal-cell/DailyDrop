@@ -1,12 +1,10 @@
 <x-app-layout>
     <x-slot name="header">
-        
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
             {{ __('Calendar for ') . $channelName }}
         </h2>
     </x-slot>
 
-   
     <div class="row m-2">
         <div class="col-2">
             <div class="list-group">
@@ -46,10 +44,21 @@
                     right: 'month,agendaWeek,agendaDay,listMonth'
                 },
 
-                events: '/channel/' + channelName + '/events'
-                
+                events: '/channel/' + channelName + '/events',
+                timeFormat: 'h:mm a', // Adjust the time format if necessary
+                eventDidMount: function(info) {
+                    $(info.el).attr({
+                        'data-bs-toggle': 'tooltip',
+                        'data-bs-placement': 'top',
+                        'title': `CastName : ${info.event.title}, 
+                        Main Cast : ${info.event.extendedProps.description},
+                        Channel : ${info.event.extendedProps.channel_name}`,
+                        'data-bs-custom-class': 'custom-tooltip'
+                    });
+
+                    $(info.el).tooltip(); // Initialize the tooltip
+                }
             });
-            
         });
     </script>
 </x-app-layout>
