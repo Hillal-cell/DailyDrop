@@ -22,6 +22,8 @@ return new class extends Migration
             $table->date('upload_date');
             $table->date('play_date');
             $table->date('end_date');
+            $table->time('start_time');
+            $table->time('end_time');
             $table->timestamps();
         });
     }
