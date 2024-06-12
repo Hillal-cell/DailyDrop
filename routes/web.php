@@ -6,7 +6,8 @@ use App\Models\EventTable;
 use App\Http\Middleware\LogAudit;
 
 Route::get('/', function () {
-    return view('welcome');
+    $version = exec('git describe --tags');
+    return view('welcome',['version' => $version]);
 });
 
 Route::get('/dashboard', function () {
@@ -14,7 +15,20 @@ Route::get('/dashboard', function () {
      // Fetch distinct channel names from the events table
      $channels = EventTable::distinct()->pluck('channel_name');
      
-        
+
+      // Check if there are any flash messages
+      if(session()->has('error')) {
+        // Flash error message to the session
+        session()->flash('error', session('error'));
+    }
+
+    if(session()->has('success')) {
+        // Flash success message to the session
+        session()->flash('success', session('success'));
+    }
+    
+    
+
      // Pass the channels to the view
      return view('dashboard', ['channels' => $channels]);
 })->middleware(['auth', 'verified','log.audit'])->name('dashboard');
@@ -29,6 +43,8 @@ Route::middleware('auth','log.audit')->group(function () {
     Route::get('/channel/{channelName}/calendar', [ProfileController::class, 'showChannelCalendar'])->name('channel.calendar');
     Route::get('/channel/{channelName}/events', [ProfileController::class, 'getChannelEvents']);
     Route::get('/report',[ProfileController::class,'getReport'])->name('report');
+    Route::get('/configuration', [ProfileController::class, 'getConfigurations'])->name('configuration');
+    Route::patch('/configuration',[ProfileController::class,'updateConfigurations'])->name('configuration.update');
     Route::patch('/update-event/{castName}', [ProfileController::class, 'updateEvent'])->name('profile.updateEvent');
 
 
