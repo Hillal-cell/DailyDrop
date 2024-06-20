@@ -15,10 +15,13 @@ return new class extends Migration
         schema::create('audit_logs', function (Blueprint $table) {
             $table->id();
             $table->unSignedBigInteger('user_id');
+            $table->string('role');
             $table->string('action')->comment('The action that was performed .i.e GET, POST, PATCH, DELETE');
             $table->string('path');
             $table->timestamps();
             $table->foreign('user_id')->references('id')->on('users')->cascadeOnUpdate()->restictOnDelete();
+            // Define composite foreign key on 'role' referencing 'id' and 'group' in 'users'
+            $table->foreign('role')->references('role')->on('users')->cascadeOnUpdate()->restictOnDelete();
         });
     }
 
