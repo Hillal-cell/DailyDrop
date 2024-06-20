@@ -13,5 +13,6 @@ class AuditLog extends Model
         'user_id',
         'action',
         'path',
+        'role'
     ];
 }
