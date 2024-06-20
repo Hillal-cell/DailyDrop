@@ -5,6 +5,10 @@ use Illuminate\Support\Facades\Route;
 use App\Models\EventTable;
 use App\Http\Middleware\LogAudit;
 
+
+
+
+
 Route::get('/', function () {
     $version = exec('git describe --tags');
     return view('welcome',['version' => $version]);
@@ -42,18 +46,24 @@ Route::middleware('auth','log.audit')->group(function () {
     Route::get('/get-cast/{castName}', [ProfileController::class, 'getCast'])->name('profile.getCast');
     Route::get('/channel/{channelName}/calendar', [ProfileController::class, 'showChannelCalendar'])->name('channel.calendar');
     Route::get('/channel/{channelName}/events', [ProfileController::class, 'getChannelEvents']);
-    Route::get('/report',[ProfileController::class,'getReport'])->name('report');
-    Route::get('/configuration', [ProfileController::class, 'getConfigurations'])->name('configuration');
-    Route::patch('/configuration',[ProfileController::class,'updateConfigurations'])->name('configuration.update');
     Route::patch('/update-event/{castName}', [ProfileController::class, 'updateEvent'])->name('profile.updateEvent');
-
+    Route::get('/get-Movieduration',[ProfileController::class,'getMovieDuration'])->name('getMovieDuration');
+    Route::get('/get-Musicduration',[ProfileController::class,'getMusicDuration'])->name('getMusicDuration');
+    Route::get('/guidelines',[ProfileController::class,'getGuidelines'])->name('guidelines');
 
 
     
 
 });
 
-
+Route::middleware(['auth','log.audit','admin'])->group(function () {
+    Route::get('/report', [ProfileController::class, 'getReport'])->name('report');
+    Route::get('/configuration', [ProfileController::class, 'getConfigurations'])->name('configuration');
+    Route::patch('/configuration', [ProfileController::class, 'updateConfigurations'])->name('configuration.update');
+    Route::get('/get-users', [ProfileController::class, 'getUsers'])->name('getUsers');
+    Route::get('/get-user/{id}', [ProfileController::class, 'updateUser'])->name('updateUser');
+    Route::PATCH('/get-user/{id}', [ProfileController::class, 'updateUser'])->name('updateUser');
+});
 
 
 require __DIR__.'/auth.php';
