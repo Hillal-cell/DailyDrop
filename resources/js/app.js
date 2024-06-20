@@ -9,21 +9,22 @@ import {
     handleDateClick,
     saveEvent,
     handleCastNameClick,
+    clearFormFields,
 } from "./functions.js";
 
 window.Alpine = Alpine;
 Alpine.start();
 
+const refetchEventsEvent = new CustomEvent('refetchEvents');
+
 document.addEventListener("DOMContentLoaded", function () {
-
-
-     document.addEventListener("dblclick", function (event) {
-         // console.log("Clicked element:", event.target);
-         handleCastNameClick(event);
-     });
+    document.addEventListener("dblclick", function (event) {
+        handleCastNameClick(event);
+    });
 
     const calendarEl = document.getElementById("calendar");
     const calendar = new Calendar(calendarEl, {
+        timeZone: "UTC",
         plugins: [dayGridPlugin, timeGridPlugin, listPlugin, multiMonthPlugin],
         initialView: "dayGridMonth",
         headerToolbar: {
@@ -42,29 +43,30 @@ document.addEventListener("DOMContentLoaded", function () {
                 'data-bs-placement': 'top',
                 'title': `CastName : ${eventTitle}, 
                 Main Cast : ${eventDescription},
-                Channel : ${info.event.extendedProps.channel_name}`
+                Channel : ${info.event.extendedProps.channel_name}`,
+                'data-bs-custom-class': 'custom-tooltip' // Add custom class here
             });
 
             $(info.el).tooltip(); // Initialize the tooltip
         }
+        
     });
 
     calendar.render();
 
+     // Listen for custom event to refetch calendar events
+     window.addEventListener('refetchEvents', function () {
+        calendar.refetchEvents();
+    });
+
     const saveEventButton = document.getElementById("save_event_button");
     if (saveEventButton) {
-        saveEventButton.removeEventListener("click", saveEvent);
+    //    saveEventButton.removeEventListener("click", saveEvent);
+    //    console.log("saveEventButton found");
         saveEventButton.addEventListener("click", saveEvent);
-    }else{
+        window.dispatchEvent(new CustomEvent('refetchEvents'));
+    } else {
         console.log("saveEventButton not found");
-    }
-
-    const updateEventButton = document.getElementById("update_event_button");
-    if (updateEventButton) {
-        updateEventButton.removeEventListener("click", handleCastNameClick);
-        updateEventButton.addEventListener("click", handleCastNameClick);
-    }else{
-        console.log("updateEventButton not found");
     }
 
     const dismissModalButton = document.getElementById("dismiss_modal_button");
@@ -72,12 +74,23 @@ document.addEventListener("DOMContentLoaded", function () {
         dismissModalButton.addEventListener("click", function () {
             $("#event_entry_modal").modal("hide");
             location.reload();
-        });}
+        });
+    }
     const dismissModalButton1 = document.getElementById("dismiss_modal_button1");
     if (dismissModalButton1) {
         dismissModalButton1.addEventListener("click", function () {
             $("#event_entry_modal").modal("hide");
             location.reload();
-        });}
+            
+        });
+    }
 
+    
+    
 });
+export { refetchEventsEvent };
+
+
+
+
+
