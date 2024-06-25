@@ -37,12 +37,13 @@ document.addEventListener("DOMContentLoaded", function () {
         eventDidMount: function (info) {
             const eventTitle = info.event.title;
             const eventDescription = info.event.extendedProps.description;
+            const type_of_control = info.event.extendedProps.typeOfControl;
 
             $(info.el).attr({
                 'data-bs-toggle': 'tooltip',
                 'data-bs-placement': 'top',
-                'title': `CastName : ${eventTitle}, 
-                Main Cast : ${eventDescription},
+                'title': `${type_of_control} : ${eventTitle}, 
+                Producer/Artist : ${eventDescription},
                 Channel : ${info.event.extendedProps.channel_name}`,
                 'data-bs-custom-class': 'custom-tooltip' // Add custom class here
             });
@@ -68,6 +69,7 @@ document.addEventListener("DOMContentLoaded", function () {
     } else {
         console.log("saveEventButton not found");
     }
+
 
     const dismissModalButton = document.getElementById("dismiss_modal_button");
     if (dismissModalButton) {
