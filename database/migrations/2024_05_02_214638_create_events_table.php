@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('cast_name');
             $table->string('main_cast_name');
-            $table->enum('is_translated', ['yes', 'no']);
+            $table->enum('is_translated', ['yes', 'no','not_applicable']);
             $table->enum('type_of_control', ['Music', 'Movie']);
             $table->string('channel_name');
             $table->integer('duration');
