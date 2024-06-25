@@ -20,6 +20,7 @@ class LogAudit
     {
         $auditLog = new AuditLog();
         $auditLog->user_id = Auth::id();
+        $auditLog->role = Auth::user()->role;
         $auditLog->action = $request->method();
         $auditLog->path = $request->path();
         $auditLog->save();
