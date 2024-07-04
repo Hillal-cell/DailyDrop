@@ -9,6 +9,9 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\View\View;
 use App\Models\EventTable;
+use App\Models\User;
+use App\Models\AuditLog;
+use App\Models\Configuration;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Http\JsonResponse;
@@ -69,48 +72,47 @@ class ProfileController extends Controller
      */
 
      public function saveEvent(Request $request)
-     {
-         // Validate the request data
-         $validatedData = $request->validate([
-             'cast_name' => 'required|string|max:255',
-             'main_cast_name' => 'required|string|max:255',
-             'is_translated' => 'required|in:yes,no',
-             'type_of_control' => 'required|in:Music,Movie',
-             'channel_name' => 'required|string|max:255',
-             'duration' => 'required|integer|min:1',
-             'upload_date' => 'required|date_format:Y-m-d',
-             'play_date' => 'required|date_format:Y-m-d',
-             'start_time' => 'required|date_format:H:i',
-             'end_time' => 'required|date_format:H:i',
-             'end_date' => 'required|date_format:Y-m-d',
-             // Add validation rules for other fields as needed
-         ]);
-     
-         // Convert start_time and end_time to H:i:s format
-         $validatedData['start_time'] = Carbon::createFromFormat('H:i', $validatedData['start_time'])->format('H:i:s');
-         $validatedData['end_time'] = Carbon::createFromFormat('H:i', $validatedData['end_time'])->format('H:i:s');
-     
-         // Check if an event with the same details already exists
-         $existingEvent = EventTable::where('cast_name', $validatedData['cast_name'])
-             ->where('main_cast_name', $validatedData['main_cast_name'])
-             ->where('channel_name', $validatedData['channel_name'])
-             ->first();
-     
-         if ($existingEvent) {
-             $currentDate = date('Y-m-d');
-             if ($currentDate < $existingEvent->end_date) {
-                 return response()->json(['success' => false, 'message' => 'An event with these details already exists and has not yet ended.'], 400);
-             }
-         }
-     
-         // Create a new event record
-         $event = EventTable::create($validatedData);
-     
-         // Return a success response
-         return response()->json(['success' => true]);
-     }
-     
-     
+{
+    // Validate the request data
+    $validatedData = $request->validate([
+        'cast_name' => 'required|string|max:255',
+        'main_cast_name' => 'required|string|max:255',
+        'is_translated' => 'required|in:not_applicable,yes,no',
+        'type_of_control' => 'required|in:Music,Movie',
+        'channel_name' => 'required|string|max:255',
+        'duration' => 'required|integer|min:1',
+        'upload_date' => 'required|date_format:Y-m-d',
+        'play_date' => 'required|date_format:Y-m-d',
+        'start_time' => 'required|date_format:H:i',
+        'end_time' => 'required|date_format:H:i',
+        'end_date' => 'required|date_format:Y-m-d',
+        // Add validation rules for other fields as needed
+    ]);
+
+    // Convert start_time and end_time to H:i:s format
+    $validatedData['start_time'] = Carbon::createFromFormat('H:i', $validatedData['start_time'])->format('H:i:s');
+    $validatedData['end_time'] = Carbon::createFromFormat('H:i', $validatedData['end_time'])->format('H:i:s');
+
+    // Check if an event with the same details already exists
+    $existingEvent = EventTable::where('cast_name', $validatedData['cast_name'])
+        ->where('main_cast_name', $validatedData['main_cast_name'])
+        ->where('channel_name', $validatedData['channel_name'])
+        ->first();
+
+    if ($existingEvent) {
+        $currentDate = date('Y-m-d');
+        if ($currentDate < $existingEvent->end_date) {
+            return response()->json(['success' => false, 'message' => 'An event with these details already exists and has not yet ended.'], 400);
+        }
+    }
+
+    // Create a new event record
+    $event = EventTable::create($validatedData);
+
+    // Return a success response
+    return response()->json(['success' => true, 'message' => 'Event has been successfully saved.'], 200);
+}
+
 
      public function getEvents(Request $request)
      {
@@ -127,8 +129,9 @@ class ProfileController extends Controller
                  'end' => $end_datetime,
                  'description' => $event->main_cast_name,
                  'channel_name' => $event->channel_name, 
+                 'typeOfControl'=>$event->type_of_control,
                  'editable' => true,
-                 'allDay' => false,
+                 'allDay' => false,   
                  'color' => 'blue',
                  'backgroundColor' => 'green',
              ];
@@ -176,7 +179,7 @@ class ProfileController extends Controller
      /**
      * Update the event information.
      */
-    public function updateEvent(Request $request, $castName): JsonResponse
+    public function updateEvent(Request $request, $castName)
 {
     try {
         // Find the event record by its cast_name
@@ -192,7 +195,7 @@ class ProfileController extends Controller
         $validatedData = $request->validate([
             'cast_name' => 'required|string|max:255',
             'main_cast_name' => 'required|string|max:255',
-            'is_translated' => 'required|in:yes,no',
+            'is_translated' => 'required|in:not_applicable,yes,no',
             'type_of_control' => 'required|in:Music,Movie',
             'channel_name' => 'required|string|max:255',
             'upload_date' => 'required|date_format:Y-m-d',
@@ -220,13 +223,13 @@ class ProfileController extends Controller
         $event->update($validatedData);
 
         // Return a success response
-        return response()->json(['success' => true]);
+        return response()->json(['success' => true])->with('success','The event has been successfully updated');
     } catch (\Exception $e) {
         // Log the exception message for debugging
         Log::error('Error updating event: ' . $e->getMessage());
 
         // Return an error response
-        return response()->json(['error' => 'Failed to update event'], 500);
+        return response()->json(['error' => 'Failed to update event'], 500)->with('error','Failed to update event.');
     }
 }
     /**
@@ -267,14 +270,143 @@ class ProfileController extends Controller
 
 
 
+    public function getConfigurations(){
+        return view('configurations');
+    }
+
+    public function getGuidelines(){
+        return view('guidelines');
+    }
+
     public function getReport(){
         return view('report');
+    }
+
+
+    public function updateConfigurations(Request $request){
+        $validatedData =$request->validate([
+            'movie_repeat'=>'required|integer|min:180',
+            'music_repeat'=>'required|integer|min:7',
+        ]);
+    
+        // Check if the values meet the criteria
+        // if ($validatedData['movie_repeat'] > 0 && $validatedData['music_repeat'] > 0) {
+            // Add the user_id to the validated data
+            $userId = auth()->id();
+            // Loop through the validated data and create or update each configuration
+            foreach ($validatedData as $key => $value) {
+                // Find the configuration with the given key for the current user
+                $config = Configuration::where('key', $key)->where('user_id', $userId)->first();
+                if ($config) {
+                    // Update the existing configuration record
+                    $config->update(['value' => $value]);
+                } else {
+                    // Create a new configuration record
+                    Configuration::create([
+                        'key' => $key,
+                        'value' => $value,
+                        'user_id' => $userId
+                    ]);
+                }
+            }
+            return Redirect::route('configuration')->with('status', 'Configurations updated successfuly.');
+       
+    }   
+
+
+
+
+    public function getMovieDuration(Request $request){
+        $movieDuration = Configuration::where('key', 'movie_repeat')->first();
+        return response()->json(['movie_duration' => $movieDuration->value]);
+    }
+
+    public function getMusicDuration(Request $request){
+        $musicDuration = Configuration::where('key', 'music_repeat')->first();
+        return response()->json(['music_duration' => $musicDuration->value]);
+    }
+
+
+    public function getUsers(){
+        $users = User::all(); 
+        return view('users', compact('users')); 
+    }
+
+
+
+    public function updateUser(Request $request, $id){
+
+
+         // If the request is a GET request, render the edit form
+         if ($request->isMethod('get')) {
+            // Retrieve the user record by ID
+            $user = User::find($id);
+
+            // Check if the user record exists
+            if (!$user) {
+                return redirect()->route('getUsers')->with('error', 'User not found.');
+            }
+
+            // Return the edit form view with the user data
+            return view('editUser', compact('user'));
+        }
+
+
+
+        // If the request is a POST request, handle the form submission
+        if ($request->isMethod('patch')) {
+            // Validate the request data
+            $validatedData = $request->validate([
+                'name' => 'required|string',
+                'email' => 'required|string',
+                'role' => 'required|string',
+                
+            ]);
+
+            // Find the student record by ID
+            $user = User::find($id);
+
+            // Check if the student record exists
+            if (!$user) {
+                return redirect()->route('getUsers')->with('error', 'User not found.');
+            }
+
+            // Update the user record with the data from the form fields
+            $user->update($validatedData);
+
+
+            return redirect()->route('getUsers')->with('status', 'User record updated successfully.');
+        }
+
+    }
+    
+    public function getLogs(Request $request) {
+        // Check if a search query parameter is present
+        $searchTerm = $request->query('search');
+
+        if (!empty($searchTerm)) {
+            $logs = AuditLog::where('user_id', 'LIKE', "%{$searchTerm}%")
+                            ->orWhere('role', 'LIKE', "%{$searchTerm}%")
+                            ->orWhere('action', 'LIKE', "%{$searchTerm}%")
+                            ->orWhere('path', 'LIKE', "%{$searchTerm}%")
+                            ->get();
+
+            if ($logs->isEmpty()) {
+                return redirect()->route('getLogs')->with('error', 'No logs found for the search term: ' . $searchTerm);
+            }
+        } else {
+            $logs = AuditLog::all();
+        }
+
+        // Return the view with the logs (filtered or all)
+        return view('logs', compact('logs'));
     }
 
 
 
 
 
+    
 
 
 }

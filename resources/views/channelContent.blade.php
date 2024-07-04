@@ -56,7 +56,7 @@
                         'data-bs-custom-class': 'custom-tooltip'
                     });
 
-                    $(info.el).tooltip(); // Initialize the tooltip
+                    //$(info.el).tooltip(); // Initialize the tooltip
                 }
             });
         });

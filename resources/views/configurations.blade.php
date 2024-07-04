@@ -1,23 +1,37 @@
 <x-app-layout>
+
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Reporting') }}
+        <h2 class="font-semibold text-xl text-red-800 leading-tight">
+            {{ __('Movies And Music Durations Configurations') }}
+        </h2>
         </h2>
     </x-slot>
 
-
+    
     
     @if (session('status'))
         <div class="alert alert-success" id="status-message" style="text-align:center;">
             {{ session('status') }}
         </div>
+    @elseif (session('error'))
+        <div class="alert alert-danger" id="status-message" style="text-align:center;">
+            {{ session('error') }}
+        </div>
     @endif
+    @if ($errors->any())
+        <div class="alert alert-danger" id="status-message" style="text-align:center;">
+            @foreach ($errors->all() as $error)
+                {{ $error }}
+            @endforeach
+        </div>
+    @endif
+    
+    
 
     <form method="POST" action="{{ route('configuration.update') }}">
         @csrf
         @method('patch')
 
-        
         
             <div class="modal-dialog modal-md" role="document">
                 
@@ -33,7 +47,7 @@
                                 <div class="col-sm-12">  
                                     <div class="form-group">
                                         <label for="movie_repeat">Movie Repetion Duration</label>
-                                        <input type="number" name="movie_repeat" id="movie_repeat" class="form-control" placeholder="Enter Movie repeat duration" required>
+                                        <input type="number" name="movie_repeat" id="movie_repeat" class="form-control" placeholder="Enter Movie repeat duration in days" required>
                                     </div>
                                 </div>    
                             </div>
@@ -41,8 +55,8 @@
                             <div class="row">
                                 <div class="col-sm-12">  
                                     <div class="form-group">
-                                        <label for="music_repeat">Music Repetion Duration</label>
-                                        <input type="number" name="music_repeat" id="music_repeat" class="form-control" placeholder="Enter Music repeat duration" required>
+                                        <label for="music_repeat">Music Repetion Duration in days</label>
+                                        <input type="number" name="music_repeat" id="music_repeat" class="form-control" placeholder="Enter Music repeat duration in days" required>
                                     </div>
                                 </div>    
                             </div>
