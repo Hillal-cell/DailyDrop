@@ -61,7 +61,7 @@ Route::middleware(['auth','log.audit','admin'])->group(function () {
     Route::get('/configuration', [ProfileController::class, 'getConfigurations'])->name('configuration');
     Route::patch('/configuration', [ProfileController::class, 'updateConfigurations'])->name('configuration.update');
     Route::get('/get-users', [ProfileController::class, 'getUsers'])->name('getUsers');
-    Route::get('/get-user/{id}', [ProfileController::class, 'updateUser'])->name('updateUser');
+    Route::get('/get-user/{id}', [ProfileController::class, 'updateUser'])->name('getUser');
     Route::PATCH('/get-user/{id}', [ProfileController::class, 'updateUser'])->name('updateUser');
     Route::get('/get-logs', [ProfileController::class, 'getLogs'])->name('getLogs');
 
