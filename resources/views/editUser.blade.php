@@ -46,8 +46,8 @@
                     <div class="form-group">
                         <label for="role">Role:</label>
                         <select name="role" class="form-control">
-                            <option value="user" {{ $user->role == 'user' ? 'selected' : '' }}>User</option>
-                            <option value="admin" {{ $user->role == 'admin' ? 'selected' : '' }}>Admin</option>
+                            <option value="user" {{ $user->role == 'user' ? 'selected' : '' }}>user</option>
+                            <option value="admin" {{ $user->role == 'admin' ? 'selected' : '' }}>admin</option>
                         </select>
                     </div>
 
