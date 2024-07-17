@@ -27,8 +27,13 @@
     @endif
     
 
+
     <div class="container" style="background:white;">
          <!-- Users Table -->
+          <div>
+            <a href="{{ route('register') }}" class="btn btn-info">Register User</a>
+          </div>
+          </div>
         <table border="10" class="table table-stripped table-hover" style="text-align:left">
             <thead>
                 <tr style="color:BlueViolet">
