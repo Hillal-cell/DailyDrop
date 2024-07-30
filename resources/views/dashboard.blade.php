@@ -48,18 +48,17 @@
                 </thead>
                 <tbody style="text-transform:uppercase">
                     @foreach ($channels as $channel)
-                            <tr>
-                                <td>
-                                    <a href="{{ route('channel.calendar', ['channelName' => $channel]) }}"  class="list-group-item list-group-item-action {{$channel==$channel}}">{{ $channel }}  </a>
-                                </td>
-                            </tr>
-                            
+                        <tr>
+                            <td>
+                                <a href="{{ route('channel.calendar', ['channelName' => $channel]) }}" class="list-group-item list-group-item-action {{$channel==$channel}}">{{ $channel }}</a>
+                            </td>
+                        </tr>
                     @endforeach
-                            <tr>
-                                <td>
-                                <a href="{{route('dashboard')}}" class="list-group-item list-group-item-action"> All Channels</a>
-                                </td>
-                            </tr>
+                    <tr>
+                        <td>
+                            <a href="{{route('dashboard')}}" class="list-group-item list-group-item-action active">All Channels</a>
+                        </td>
+                    </tr>
                 </tbody>
             </table>
 
