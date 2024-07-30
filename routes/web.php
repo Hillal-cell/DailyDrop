@@ -50,7 +50,7 @@ Route::middleware('auth','log.audit')->group(function () {
     Route::get('/get-Movieduration',[ProfileController::class,'getMovieDuration'])->name('getMovieDuration');
     Route::get('/get-Musicduration',[ProfileController::class,'getMusicDuration'])->name('getMusicDuration');
     Route::get('/guidelines',[ProfileController::class,'getGuidelines'])->name('guidelines');
-
+    Route::get('/guide', [ProfileController::class, 'getgiude'])->name('guide');
 
     
 
