@@ -404,6 +404,25 @@ class ProfileController extends Controller
 
 
 
+    public function getgiude(){
+        $events = EventTable::all()->map(function ($event) {
+            return [
+                'channel_name' => $event->channel_name,
+                'cast_name' => $event->cast_name,
+                'start_time' => $event->start_time,
+                'end_time' => $event->end_time,
+            ];
+        });
+
+
+        $channels = EventTable::distinct()->pluck('channel_name');
+        
+        return view('guide', [
+            'channels' => $channels,
+            'events' => $events
+        ]);
+    }
+
 
 
     
