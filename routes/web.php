@@ -4,6 +4,7 @@ use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Models\EventTable;
 use App\Http\Middleware\LogAudit;
+use App\Http\Controllers\EventTableController;
 
 
 
@@ -51,6 +52,8 @@ Route::middleware('auth','log.audit')->group(function () {
     Route::get('/get-Musicduration',[ProfileController::class,'getMusicDuration'])->name('getMusicDuration');
     Route::get('/guidelines',[ProfileController::class,'getGuidelines'])->name('guidelines');
     Route::get('/guide', [ProfileController::class, 'getgiude'])->name('guide');
+    Route::post('/csvupload', [EventTableController::class, 'uploadCSVfile'])->name('uploadCSV');
+    
 
     
 
