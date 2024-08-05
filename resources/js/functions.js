@@ -202,13 +202,12 @@ function clearFormFieldsIfNotNull(clickedDate) {
     saveEventButton.enabled = true;
 }
 
-export function handleCastNameClick(event) {
-    const castName = event.target.textContent;
+export function handleCastNameClick(eventTitle) {
     const saveEventButton = document.getElementById("save_event_button");
     saveEventButton.disabled = true;
 
-    // Fetch cast data based on the cast name
-    fetch(`/get-cast/${castName}`)
+    // Fetch cast data based on the event title
+    fetch(`/get-cast/${eventTitle}`)
         .then((response) => {
             if (!response.ok) {
                 throw new Error("Network response was not ok");
@@ -242,10 +241,10 @@ export function handleCastNameClick(event) {
                 duration = await checkDurationMusic();
             } 
 
-             // Calculate end date
-             const endDate = calculateEndDate(data.play_date, duration);
-             $("#end_date").val(endDate);
- 
+            // Calculate end date
+            const endDate = calculateEndDate(data.play_date, duration);
+            $("#end_date").val(endDate);
+
             // Handle the update event button click
             $("#update_event_button").off('click').on('click', function () {
                 const updatedCastName = $("#cast_name").val();
@@ -255,7 +254,7 @@ export function handleCastNameClick(event) {
                 const updatedChannelName = $("#channel_name").val();
                 const updatedUploadDate = $("#upload_date").val();
                 const updatedPlayDate = $("#play_date").val();
-                const updatedDuration =duration;
+                const updatedDuration = duration;
                 const updatedStartTime = $("#start_time").val();
                 const updatedEndTime = $("#end_time").val();
 
@@ -296,12 +295,10 @@ export function handleCastNameClick(event) {
                         console.error("Error occurred during update request:", error.message);
                         location.reload(); // Refresh the page on error
                     });
-                  
             });
         })
         .catch((error) => {
             console.error("Error fetching cast data:", error.message);
-            
         })
         .finally(() => {
             saveEventButton.disabled = true;
