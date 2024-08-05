@@ -39,7 +39,7 @@
             </div>
         </form>
         <table  class="table table-stripped table-hover" style="text-align:left">
-            <thead>
+            <thead style ="color:blue">
                 <th>USER ID</th>
                 <th>ROLE</th>
                 <th>ACTION</th>
@@ -60,6 +60,10 @@
                 @endforeach
             </tbody>
         </table>
+
+        <div class="table table-info">
+            {{ $logs->links() }}
+        </div>
     </div>
     
     
