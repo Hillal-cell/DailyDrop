@@ -18,10 +18,7 @@ Alpine.start();
 const refetchEventsEvent = new CustomEvent('refetchEvents');
 
 document.addEventListener("DOMContentLoaded", function () {
-    document.addEventListener("dblclick", function (event) {
-        handleCastNameClick(event);
-    });
-
+   
     const calendarEl = document.getElementById("calendar");
     const calendar = new Calendar(calendarEl, {
         timeZone: "UTC",
@@ -31,24 +28,37 @@ document.addEventListener("DOMContentLoaded", function () {
             left: "prev,next today",
             center: "title",
             right: "dayGridMonth,timeGridWeek,listWeek,multiMonthYear",
+            
         },
         events: "/get-events",
         dateClick: handleDateClick,
+
         eventDidMount: function (info) {
             const eventTitle = info.event.title;
             const eventDescription = info.event.extendedProps.description;
             const type_of_control = info.event.extendedProps.typeOfControl;
+          
+            
+            info.el.style.backgroundColor = info.event.extendedProps.backgroundColor;
 
+            
             $(info.el).attr({
                 'data-bs-toggle': 'tooltip',
                 'data-bs-placement': 'top',
                 'title': `${type_of_control} : ${eventTitle}, 
                 Producer/Artist : ${eventDescription},
                 Channel : ${info.event.extendedProps.channel_name}`,
-                'data-bs-custom-class': 'custom-tooltip' // Add custom class here
+                
+                
             });
 
             $(info.el).tooltip(); // Initialize the tooltip
+
+            // Add double-click event listener to the event element
+            info.el.addEventListener("dblclick", function () {
+                handleCastNameClick(eventTitle);
+                
+            });
         }
         
     });
@@ -62,8 +72,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     const saveEventButton = document.getElementById("save_event_button");
     if (saveEventButton) {
-    //    saveEventButton.removeEventListener("click", saveEvent);
-    //    console.log("saveEventButton found");
+    
         saveEventButton.addEventListener("click", saveEvent);
         window.dispatchEvent(new CustomEvent('refetchEvents'));
     } else {
