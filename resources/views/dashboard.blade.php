@@ -13,27 +13,36 @@
                 </div>
         
                 @if (session('status'))
-        <div class="alert alert-success" id="status-message" style="text-align:center;">
-            {{ session('status') }}
-        </div>
-    @elseif (session('error'))
-        <div class="alert alert-danger" id="status-message" style="text-align:center;">
-            {{ session('error') }}
-        </div>
-    @endif
-    @if ($errors->any())
-        <div class="alert alert-danger" id="status-message" style="text-align:center;">
-            @foreach ($errors->all() as $error)
-                {{ $error }}
-            @endforeach
-        </div>
-    @endif
+                    <div class="alert alert-success" id="status-message" style="text-align:center;">
+                        {{ session('status') }}
+                    </div>
+                @elseif (session('error'))
+                    <div class="alert alert-danger" id="status-mesage" style="text-align:center;">
+                        {!! session('error') !!}
+                    </div>
+                @endif
+                @if ($errors->any())
+                    <div class="alert alert-danger" id="status-mesage" style="text-align:center;">
+                        @foreach ($errors->all() as $error)
+                            {!! $error !!}<br>
+                        @endforeach
+                    </div>
+                @endif
             </div>
         </div>
         
     </div>
 
-
+    <div class="modal-body" style="margin-left : 0px">
+        <form action="{{ route('uploadCSV') }}" method="POST" enctype="multipart/form-data">
+            @csrf
+            <div class="input-group mb-3 ml-auto">
+                <input type="file" class="form-control d-none" id="csv_file_input" name="upload-file" accept=".csv">
+                <button type="button" class="btn btn-secondary" id="choose_csv_button">Choose CSV File</button>
+                <button type="submit" class="btn btn-success d-none" id="upload_csv_button">Upload Selected CSV</button>
+            </div>
+        </form>
+    </div>
 
 
     <!-- Separate div for the calendar -->
@@ -220,6 +229,34 @@
                
             }
         }
+
+
+        document.getElementById("choose_csv_button").addEventListener("click", function() {
+            document.getElementById("csv_file_input").click();
+        });
+
+        document.getElementById("csv_file_input").addEventListener("change", function() {
+            const fileName = this.value.split("\\").pop();
+            if (fileName) {
+                document.getElementById("upload_csv_button").classList.remove("d-none");
+                document.getElementById("choose_csv_button").classList.add("d-none");
+            }
+        });
+
+
+        
+        // Wait for the DOM to be fully loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            // Select the status message element
+            var statusMessage = document.getElementById('status-message');
+            // If the element exists, set a timeout to hide it after 5 seconds
+            if (statusMessage) {
+                setTimeout(function() {
+                    statusMessage.style.display = 'none';
+                }, 5000); // 5000 milliseconds = 5 seconds
+            }
+        });
+
 
        
     </script>
