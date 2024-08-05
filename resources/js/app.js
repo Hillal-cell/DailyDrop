@@ -9,7 +9,6 @@ import {
     handleDateClick,
     saveEvent,
     handleCastNameClick,
-    clearFormFields,
 } from "./functions.js";
 
 window.Alpine = Alpine;
@@ -37,9 +36,25 @@ document.addEventListener("DOMContentLoaded", function () {
             const eventTitle = info.event.title;
             const eventDescription = info.event.extendedProps.description;
             const type_of_control = info.event.extendedProps.typeOfControl;
-          
+            const channel_name = info.event.extendedProps.channel_name;
             
-            info.el.style.backgroundColor = info.event.extendedProps.backgroundColor;
+            if (channel_name === "Bangers") {
+                info.el.style.backgroundColor = "#ff1100";
+            } else if (channel_name === "Diaspora") {
+                info.el.style.backgroundColor = "#ee00ff";
+            } else if (channel_name === "Zamani") {
+                info.el.style.backgroundColor = "#3357FF";
+            } else if (channel_name === "Muziki 256") {
+                info.el.style.backgroundColor = "#06ff00";
+            }else if (channel_name === "Prayze") {
+                info.el.style.backgroundColor = "#ff00c8"; 
+            }else if (channel_name === "Emikolo") {
+                info.el.style.backgroundColor = "#ff8c00";
+            }else if (channel_name === "Filimu") {
+                info.el.style.backgroundColor = "#00ffea";
+            }else {
+                info.el.style.backgroundColor = "#ff00c8";
+            }
 
             
             $(info.el).attr({
