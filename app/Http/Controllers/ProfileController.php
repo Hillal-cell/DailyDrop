@@ -113,34 +113,47 @@ class ProfileController extends Controller
     return response()->json(['success' => true, 'message' => 'Event has been successfully saved.'], 200);
 }
 
+    
+public function getEvents(Request $request)
+{
+    // Define a color mapping for different channel names
+    $colorMapping = [
+        'Bangers' => ['bg' => '#ff1100'],
+        'Diaspora' => ['bg' => '#ee00ff'],
+        'Zamani' => ['bg' => '#3357FF'],
+        'Muziki 256' => ['bg' => '#06ff00'],
+        'Filimu' => ['bg' => '#00ffee'],
+        // Add more mappings as needed
+    ];
 
-     public function getEvents(Request $request)
-     {
-         // Retrieve events data from the database
-         $events = EventTable::all()->map(function ($event) {
-             // Combine upload_date with start_time and end_time and convert to ISO 8601 format
-             $start_datetime = Carbon::createFromFormat('Y-m-d H:i:s', $event->upload_date . ' ' . $event->start_time)->toIso8601String();
-             $end_datetime = Carbon::createFromFormat('Y-m-d H:i:s', $event->upload_date . ' ' . $event->end_time)->toIso8601String();
-     
+    // Retrieve events data from the database
+    $events = EventTable::all()->map(function ($event) use ($colorMapping) {
+        // Combine upload_date with start_time and end_time and convert to ISO 8601 format
+        $start_datetime = Carbon::createFromFormat('Y-m-d H:i:s', $event->upload_date . ' ' . $event->start_time)->toIso8601String();
+        $end_datetime = Carbon::createFromFormat('Y-m-d H:i:s', $event->upload_date . ' ' . $event->end_time)->toIso8601String();
+
+        // Get the background color for the channel name
+        $colors = $colorMapping[$event->channel_name] ?? ['bg' => '#000000']; // Default to black if channel name not found
+
+
+        return [
+            'title' => $event->cast_name,
+            'start' => $start_datetime,
+            'end' => $end_datetime,
+            'description' => $event->main_cast_name,
+            'channel_name' => $event->channel_name,
+            'typeOfControl' => $event->type_of_control,
+            // 'editable' => true,
+            'allDay' => false,
+            'backgroundColor' => $colors['bg'],
             
-             return [
-                 'title' => $event->cast_name,
-                 'start' => $start_datetime,
-                 'end' => $end_datetime,
-                 'description' => $event->main_cast_name,
-                 'channel_name' => $event->channel_name, 
-                 'typeOfControl'=>$event->type_of_control,
-                 'editable' => true,
-                 'allDay' => false,   
-                 'color' => 'blue',
-                 'backgroundColor' => 'green',
-             ];
-         });
-     
-         // Return events data as JSON response
-         return response()->json($events);
-     }
-     
+            // 'borderColor' => $colors['border'],
+        ];
+    });
+
+    // Return events data as JSON response
+    return response()->json($events);
+}
 
      
 
@@ -395,7 +408,7 @@ class ProfileController extends Controller
                 return redirect()->route('getLogs')->with('error', 'No logs found for the search term: ' . $searchTerm);
             }
         } else {
-            $logs = AuditLog::all();
+            $logs = AuditLog::paginate(20);
         }
 
         // Return the view with the logs (filtered or all)
