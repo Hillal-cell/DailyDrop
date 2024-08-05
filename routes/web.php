@@ -19,24 +19,12 @@ Route::get('/dashboard', function () {
 
      // Fetch distinct channel names from the events table
      $channels = EventTable::distinct()->pluck('channel_name');
-     
-
-      // Check if there are any flash messages
-      if(session()->has('error')) {
-        // Flash error message to the session
-        session()->flash('error', session('error'));
-    }
-
-    if(session()->has('success')) {
-        // Flash success message to the session
-        session()->flash('success', session('success'));
-    }
-    
-    
-
+   
      // Pass the channels to the view
      return view('dashboard', ['channels' => $channels]);
 })->middleware(['auth', 'verified','log.audit'])->name('dashboard');
+
+
 
 Route::middleware('auth','log.audit')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
